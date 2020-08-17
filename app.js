@@ -10,26 +10,111 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+let employees = []; //list of team members
 
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
+//prompt to add more employees or end 
+const addEmployee = {
+    name: "addEmployee",
+    type: "list",
+    message: "Which employee do you want to add to the team?",
+    choices: ["Engineer", "Intern", "No more employees to add"]
+};
 
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
+const managerQuestions = [{
+    name: "name",
+    type: "input",
+    message: "What is the manager's name?"
+}, {
+    name: "id",
+    type: "input",
+    message: "What is the manager's id?"
+}, {
+    name: "email",
+    type: "input",
+    message: "What is the manager's email?"
+}, {
+    name: "officeNumber",
+    type: "input",
+    message: "What is the manager's office number?"
+}];
 
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
+const engineerQuestions = [{
+    name: "name",
+    type: "input",
+    message: "What is the engineer's name?"
+}, {
+    name: "id",
+    type: "input",
+    message: "What is the engineer's id?"
+}, {
+    name: "email",
+    type: "input",
+    message: "What is the engineer's email?"
+}, {
+    name: "github",
+    type: "input",
+    message: "What is the engineer's github?"
+}];
 
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
+const internQuestions = [{
+    name: "name",
+    type: "input",
+    message: "What is the interns's name?"
+}, {
+    name: "id",
+    type: "input",
+    message: "What is the intern's id?"
+}, {
+    name: "email",
+    type: "input",
+    message: "What is the intern's email?"
+}, {
+    name: "school",
+    type: "input",
+    message: "Where does the intern attend school?"
+}];
 
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
+const addEmployeePrompt = () => {
+    inquirer.prompt(addEmployee).then(input => {
+        switch (input.addEmployee) {
+            case "Engineer":
+                askQuestions("engineer", engineerQuestions);
+                break;
+            case "Intern":
+                askQuestions("intern", internQuestions);
+                break;
+            case "No more employees to add":
+                fs.writeFile(outputPath, render(employees), (err) => {
+                    if (err) throw err;
+                    console.log('The file has been saved in the output folder!');
+                })
+                break;
+        };
+    });
+
+};
+
+const askQuestions = (employeeType, questionArray) => {
+    inquirer.prompt(questionArray).then(input => {
+        switch (employeeType) {
+            case "manager":
+                employees.push(new Manager(input.name, input.id, input.email, input.officeNumber));
+                break;
+            case "engineer":
+                employees.push(new Engineer(input.name, input.id, input.email, input.github));
+                break;
+            case "intern":
+                employees.push(new Intern(input.name, input.id, input.email, input.school));
+                break;
+        }
+        addEmployeePrompt(); 
+    });
+};
+
+const init = () => {
+    askQuestions("manager", managerQuestions)
+};
+
+init(); 
+
+
